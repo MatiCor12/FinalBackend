@@ -1,4 +1,5 @@
 ### Proyect backend
+##### Clarification: in the terminal with npm run dev the localhost runs
 ###### Images testing functionality
 
 ###### Post
