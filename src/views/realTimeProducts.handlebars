@@ -1,0 +1,39 @@
+<div>
+    <h1>Real time products:</h1>
+<table>
+    <tbody id="productos-body">
+    </tbody>
+</table>
+    <h2>Agregar Producto</h2>
+<form id="producto-form">
+    <!-- Product name -->
+    <label for="titulo">Product name</label>
+    <input type="text" name="titulo" id="titulo" placeholder="Product" required>
+
+    <!-- Description -->
+    <label for="descripcion">Description</label>
+    <input type="text" name="descripcion" id="descripcion" placeholder="Caracteristicas del producto" required>
+
+    <!-- Price -->
+    <label for="precio">Price</label>
+    <input type="number" name="precio" id="precio" placeholder="1200" required>
+
+    <!-- Code -->
+    <label for="codigo">Code</label>
+    <input type="text" name="codigo" id="codigo" placeholder="A001" required>
+
+    <!-- Stock -->
+    <label for="stock">Stock</label>
+    <input type="number" name="stock" id="stock" placeholder="3" required>
+
+    <!-- Category -->
+    <label for="categoria">Category</label>
+    <input type="text" name="categoria" id="categoria" placeholder="Gamer" required>
+
+    <!-- Button to added -->
+    <button type="submit">Added product</button>
+</form>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/realtime.js"></script>
