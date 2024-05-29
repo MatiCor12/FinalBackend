@@ -7,10 +7,9 @@ import {Server} from "socket.io"
 import { engine } from "express-handlebars"
 import __dirname from "./utils.js"
 import 'dotenv/config'
-import { productModel } from "./models/product.model.js"
 import { dbConnection } from "./config/config.js"
 import MessageManager from './class/ChatManager.js'
-import { addProductService, getProductsService } from "./services/products.js"
+import { addProductModerate, getProductsModerate } from "./moderate/products.js"
 
 //Nombramos la variable app con la función de expres
 const app = express()
@@ -49,12 +48,12 @@ const io = new Server(expressServer)
 
 io.on('connection', async(socket) => {
 
-    const {payload} = await getProductsService({})
+    const {payload} = await getProductsModerate({})
     const productos = payload
     socket.emit('products', payload);
 
     socket.on('addProducto', async (product)=> {
-        const newProduct = await addProductService({...product});
+        const newProduct = await addProductModerate({...product});
         if(newProduct) {
             productos.push(newProduct)
             socket.emit('products', productos);

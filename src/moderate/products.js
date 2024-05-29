@@ -1,19 +1,19 @@
 import { productModel } from "../models/product.model.js";
 
-export const getProductsService = async ({ limit = 2, page = 1, sort, query}) => {
+export const getProductsModerate = async ({ limit = 2, page = 1, sort, query}) => {
     try {
         page = page == 0 ? 1 : page;
         page = Number(page);
         limit = Number(limit);
         const skip = (page-1) * limit;
-        const sortOrderOptions = { 'asc': -1, 'desc': 1 };
-        sort = sortOrderOptions[sort] || null;
+        const sortOrder = { 'asc': -1, 'desc': 1 };
+        sort = sortOrder[sort] || null;
 
         try{
             if(query)
                 query = JSON.parse(decodeURIComponent(query))
         }catch (error) {
-            console.log("Error al parsear:", error)
+            console.log("Parsing error:", error)
             query = {}
         }
 
@@ -42,43 +42,43 @@ export const getProductsService = async ({ limit = 2, page = 1, sort, query}) =>
         }
 
     } catch (error) {
-        console.log('getProductsService -> ', error)
+        console.log('getProductsModerate -> ', error)
         throw error
     }
 }
 
-export const getProductByIdService = async (pid) => {
+export const getProductByIdModerate = async (pid) => {
     try {
         return await productModel.findById(pid)
     } catch (error) {
-        console.log('getProductByIdService -> ', error)
+        console.log('getProductByIdModerate -> ', error)
         throw error
     }
 }
 
-export const addProductService = async ({ title, description, price, thumbnails, code, stock, category, status}) => {
+export const addProductModerate = async ({ title, description, price, thumbnails, code, stock, category, status}) => {
     try {
         return await productModel.create({title, description, price, thumbnails, code, stock, category, status})
     } catch (error) {
-        console.log('addProductService ->', error)
+        console.log('addProductModerate ->', error)
         throw error
     }
 }
 
-export const deleteProductService = async (pid) => {
+export const deleteProductModerate = async (pid) => {
     try {
         return await productModel.findByIdAndDelete(pid)
     } catch (error) {
-        console.log('deleteProductService ->', error)
+        console.log('deleteProductModerate ->', error)
         throw error
     }
 }
 
-export const updateProductService = async (pid, rest) => {
+export const updateProductModerate = async (pid, rest) => {
     try {
         return await productModel.findByIdAndUpdate(pid,{ ...rest },{ new: true })
     } catch (error) {
-        console.log('updateProductService ->', error)
+        console.log('updateProductModerate ->', error)
         throw error
     }
 }

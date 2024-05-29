@@ -25,15 +25,15 @@
             <td>{{this.stock}}</td>
             <td>{{this.category}}</td>
             <td>{{#if this.status}}
-                Activo
+                Active
                 {{else}}
-                Desactivado
+                Disabled
                 {{/if}}
             </td>
             <td>{{#if this.thumbanails.length}}
                 <a href="{{this.thumbnails.[0]}}" target="_blank">{{this.thumbanails.[0]}}</a>
                 {{else}}
-                No hay imagen
+                There is no image
                 {{/if}}
             </td>
         </tr>
