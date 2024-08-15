@@ -1,12 +1,14 @@
-import {Router} from "express"
-import { addProduct, deleteProduct, getProductById, getProducts, updateProduct } from "../controllers/products.js"
+import { Router } from 'express'
+import ProductController from '../controllers/products.js'
+import { isAuthenticated, isAdmin, isPremium, isOwnerOrAdmin } from '../middleware/auth.js'
 
 const router = Router()
+const productController = new ProductController()
 
-router.get('/', getProducts);
-router.get('/:pid', getProductById);
-router.post('/', addProduct);
-router.put('/:pid', updateProduct);
-router.delete('/:pid', deleteProduct)
+router.get('/products', productController.getProducts)
+router.get('/products/:pid', productController.getProductById)
+router.post('/products', isAuthenticated, isPremium, productController.addProduct)
+router.put('/products/:pid', isAuthenticated, isOwnerOrAdmin, productController.updateProduct)
+router.delete('/products/:pid', isAuthenticated, isOwnerOrAdmin, productController.deleteProduct)
 
-export default router
+export default router;

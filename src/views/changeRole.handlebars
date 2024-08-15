@@ -1,0 +1,45 @@
+<form id="change-role-form" action="/api/sessions/change-role/{{user._id}}" method="POST">
+    <select name="role">
+        <option value="premium">Make premium</option>
+        <option value="user">Make user</option>
+    </select>
+    <button type="submit">Change role</button>
+</form>
+
+<script>
+    document.getElementById('change-role-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    console.log('Formulario enviado');
+
+    const form = event.target;
+    const formData = new FormData(form);
+    const role = formData.get('role');
+    console.log('Role seleccionado:', role);
+
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ role })
+    })
+    .then(response => {
+        if (response.ok) {
+            let message = '';
+            if (role === 'premium') {
+                message = 'Congratulations! You are now a Premium user';
+            } else {
+                message = 'You have changed to a standard user';
+            }
+            alert(message);
+            window.location.href = '/api/sessions/current';
+        } else {
+            alert('Error changing role. try again');
+        }
+    })
+    .catch(error => {
+        console.error('Error en fetch:', error);
+        alert('Error changing role. try again');
+    });
+});
+</script>

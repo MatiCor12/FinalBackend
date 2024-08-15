@@ -1,0 +1,21 @@
+<nav>
+    <div>
+        <a href="/">HOME</a>
+        <div id="navbarSupportedContent">
+            <ul>
+                <li>
+                    <a class="nav-link active" aria-current="page" href="/realTimeProducts">Add Products</a>
+                </li>
+                <li>
+                    <a class="nav-link active" href="/chat">Chat</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {{#if user}}
+            <div><a href="/api/sessions/current">Profile</a></div>
+            <div><a href="/api/carts/{{user.cart._id}}">Cart</a> </div>
+            {{else}}
+            <a href="/login" class="btn btn-info">Login</a>
+    {{/if}}
+</nav>

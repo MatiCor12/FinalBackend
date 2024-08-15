@@ -1,27 +1,16 @@
 import { Router } from 'express';
-import { getProductsModerate } from '../moderate/products.js';
-import { getCartByIdModerate } from '../moderate/carts.js';
+import ViewsController from '../controllers/views.js';
+import { isAuthenticated, isAdminOrPremium, isUser, isNotAuthenticated, isUserOrPremium } from '../middleware/auth.js';
 
-const router = Router()
+const router = Router();
+const viewsController = new ViewsController();
 
-router.get('/',async (req, res)=> {
-    const {payload} = await getProductsModerate({})
-    return res.render('home', { productos: payload, title: 'Home'})
-})
+router.get('/', viewsController.getProducts.bind(viewsController));
+router.get('/products/:pid', viewsController.getProductById.bind(viewsController));
+router.post('/products', isAuthenticated, isUser, viewsController.addProductToCart.bind(viewsController));
+router.get('/realtimeproducts', isAuthenticated, isAdminOrPremium, viewsController.getRealTimeProducts.bind(viewsController));
+router.get('/chat', isAuthenticated, isUserOrPremium, viewsController.getChat.bind(viewsController));
+router.get('/login', isNotAuthenticated, viewsController.getLogin.bind(viewsController));
+router.get('/register', isNotAuthenticated, viewsController.getRegister.bind(viewsController));
 
-router.get('/realtimeproducts',(req, res)=>{
-    return res.render('realTimeProducts', {title: 'Real time'})
-})
-
-router.get('/products', async(req,res)=>{
-    const result = await getProductsModerate({...req.query})
-    return res.render('products', {title:'productos', result})
-})
-
-router.get('/cart/:cid', async (req,res)=>{
-    const {cid} = req.params
-    const carrito = await getCartByIdModerate(cid);
-    return res.render('cart', {title: 'carrito', carrito})
-})
-
-export default router
+export default router;

@@ -1,79 +1,142 @@
-import { request, response} from 'express'
-import { addProductInCartModerate, createCartModerate, deleteProductsInCartModerate, getCartByIdModerate, updateProductsInCartModerate, deleteCartModerate } from '../moderate/carts.js'
+import nodemailer from 'nodemailer';
+import CartService from '../repositories/cartsRepository.js';
+import Ticket from '../dao/models/ticket.model.js'
 
-export const getCartById = async (req = request, res = response) => {
-    try{
-        const { cid } = req.params
-        const carrito =  await getCartByIdModerate(cid)
-        if(carrito)
-            return res.json({ carrito })
-        return res.status(404).json({msg:`Cart with id ${cid} not found`})
-    } catch (error) {
-        return res.status(500).json({msg:'Talk to administrator'})
+const cartService = new CartService();
+
+export default class CartController {
+    async createCart(req, res) {
+        try {
+            const newCart = await cartService.createCart();
+            res.status(201).json(newCart);
+        } catch (error) {
+            console.error('Error creating cart', error);
+            res.status(500).json({ error: 'Error creating cart'});
+        }
     }
-}
 
-export const createCart = async (req = request, res = response) => {
-    try{
-        const carrito = await createCartModerate({})
-        return res.json({msg:'Cart created', carrito })
-    } catch (error) {
-        console.log('createCart ->', error)
-        return res.status(500).json({msg:'Talk to administrator'})
+    async getCartById(req, res) {
+        try {
+            const cartId = req.user.cart._id;
+            const cart = await cartService.getCartById(cartId);
+            if (!cart) {
+                return res.status(404).json({ error: 'Cart not found' });
+            }
+            res.render('cart', { cart });
+        } catch (error) {
+            console.error('Error getting cart', error);
+            res.status(500).json({ error: 'Error getting cart' });
+        }
     }
-}
 
-export const addProductInCart = async (req = request, res = response) => {
-    try{
-        const { cid, pid } = req.params
-
-        const carrito = await addProductInCartModerate(cid, pid)
-
-        if(!carrito)
-            return res.status(404).json({msg: `Cart with id ${cid} not found`})
-
-        return res.json({msg: 'Updated cart', carrito})
-    } catch (error) {
-        return res.status(500).json({msg:'Talk to administrator'})
+    async purchaseCart(req, res) {
+        try {
+            const { cid } = req.params;
+            const cart = await cartService.getCartById(cid);
+            if (!cart) {
+                return res.status(404).send('Cart not found');
+            }
+    
+            const amount = cart.items.reduce((total, item) => total + (item.productId.price * item.quantity), 0);
+            const ticket = {
+                amount,
+                purchaser: req.user.email
+            };
+    
+            res.render('purchase', { cart, ticket });
+        } catch (error) {
+            console.error('Error getting purchase details', error);
+            res.status(500).send('Error getting purchase details');
+        }
     }
-}
 
-export const deleteProductsInCart = async (req = request, res = response) => {
-    try{
-        const {cid, pid} = req.params;
-        const carrito = await deleteProductsInCartModerate(cid, pid)
-        if(!carrito)
-            return res.status(404).json({msg: 'Cannot perform deletion'})
-        return res.json({msg: 'Product removed from cart', carrito})
-    } catch (error) {
-        return res.status(500).json({msg:'Talk to administrator'})
+    async addItemToCart(req, res) {
+        try {
+            const { cid, pid } = req.params;
+            const { quantity } = req.body;
+            const user = req.session.user;
+            const updatedCart = await cartService.addItemToCart(cid, pid, quantity, user);
+            res.status(200).json(updatedCart);
+        } catch (error) {
+            console.error('Error when adding product to cart', error.message);
+            res.status(500).json({ error: 'Error when adding product to cart' });
+        }
     }
-}
 
-export const updateProductsInCart = async (req = request, res = response) => {
-    try{
-        const {cid, pid} = req.params;
-        const {quantity} = req.body;
-        if(!quantity || !Number.isInteger(quantity))
-            return res.json({msg: 'The quantity property is mandatory and must be an integer'})
-        const carrito = await updateProductsInCartModerate(cid, pid, quantity)
-        if(!carrito)
-            return res.status(404).json({msg: 'I cannot update the product'})
-        return res.json({msg: 'Updated product from cart', carrito})
-    } catch (error) {
-        return res.status(500).json({msg:'Talk to administrator'})
+    async payForCart(req, res) {
+        try {
+            const { cid } = req.params;
+            const cart = await cartService.getCartById(cid);
+            if (!cart) {
+                return res.status(404).send('Cart not found');
+            }
+            cart.items = [];
+            await cart.save();
+            res.status(200).send('Purchase made');
+        } catch (error) {
+            console.error('Error when making purchase:', error);
+            res.status(500).send('Error when making purchase');
+        }
     }
-}
 
-export const deleteCart = async (req = request, res = response) => {
-    try{
-        const {cid} = req.params;
+    async sendReceipt(req, res) {
+        try {
+            const { cid } = req.params;
+            const cart = await cartService.getCartById(cid);
+            if (!cart) {
+                return res.status(404).send('Cart not found');
+            }
+            const amount = cart.items.reduce((total, item) => total + (item.productId.price * item.quantity), 0);
+            const ticket = new Ticket({
+                amount,
+                purchaser: req.user.email
+            });
+            await ticket.save();
+            // Enviar email con el comprobante de compra
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                port: 587,
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: "zgmq zily imux crto"
+                }
+            });
 
-        const carrito = await deleteCartModerate(cid)
-        if(!carrito)
-            return res.status(404).json({msg: 'Could not delete cart'})
-        return res.json({msg: 'Cart deleted', carrito})
-    } catch (error) {
-        return res.status(500).json({msg:'Talk to administrator'})
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: req.user.email,
+                subject: 'Proof of your purchase',
+                text: `Thank you for your purchase. Your ticket code is:${ticket.code}`
+            };
+
+            await transporter.sendMail(mailOptions);
+
+            res.status(200).send('Proof of your purchase');
+        } catch (error) {
+            console.error('Error sending receipt', error);
+            res.status(500).send('Error sending receipt');
+        }
+    }
+
+    async removeItemFromCart(req, res) {
+        try {
+            const { cid, pid } = req.params;
+            const updatedCart = await cartService.removeItemFromCart(cid, pid);
+            res.status(200).json(updatedCart);
+        } catch (error) {
+            console.error('Error when removing product from cart:', error);
+            res.status(500).json({ error: 'Error when removing product from cart' });
+        }
+    }
+
+    async clearCart(req, res) {
+        try {
+            const { cid } = req.params;
+            const clearedCart = await cartService.clearCart(cid);
+            res.status(200).json(clearedCart);
+        } catch (error) {
+            console.error('Error emptying cart', error);
+            res.status(500).json({ error: 'Error emptying cart' });
+        }
     }
 }

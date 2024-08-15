@@ -1,62 +1,96 @@
-import { request, response} from 'express'
-import { addProductModerate, deleteProductModerate, getProductByIdModerate, getProductsModerate, updateProductModerate } from '../moderate/products.js';
+import ProductService from '../repositories/productsRepository.js';
 
-export const getProducts = async (req = request, res = response) => {
-    try {
-        const result = await getProductsModerate({...req.query})
-        return res.json({ result })
-    } catch (error) {
-        return res.status(500).json({msg:'Talk to administrator'})
+const productService = new ProductService();
+
+export default class ProductController {
+    async getProducts(req, res) {
+        try {
+            let { limit = 10, page = 1, sort, query, availability } = req.query;
+            const options = {
+                page: Number(page),
+                limit: Number(limit),
+                lean: true
+            };
+
+            if (sort) {
+                options.sort = { price: sort === 'asc' ? 1 : -1 };
+            }
+
+            let filter = {};
+            if (query) {
+                filter.category = query;
+            }
+            if (availability) {
+                filter.status = availability === 'available' ? true : false;
+            }
+
+            const products = await productService.getProducts(filter, options);
+
+            res.status(200).json({
+                status: 'success',
+                payload: products.docs,
+                totalPages: products.totalPages,
+                prevPage: products.hasPrevPage ? products.prevPage : null,
+                nextPage: products.hasNextPage ? products.nextPage : null,
+                page: products.page,
+                hasPrevPage: products.hasPrevPage,
+                hasNextPage: products.hasNextPage
+            });
+        } catch (error) {
+            res.status(500).json({ status: 'error', message: 'Server Error', error: error.message });
+        }
     }
-}
 
-export const getProductById = async (req = request, res = response) => {
-    try {
-        const {pid} = req.params;
-        const product = await getProductByIdModerate(pid)
-        if(!product)
-            return res.status(404).json({ msg: `The product with id${pid} not found`})
-        return res.json({ product })
-    } catch (error) {
-        console.log('getProductById -> ', error)
-        return res.status(500).json({msg:'Talk to administrator'})
+    async getProductById(req, res) {
+        try {
+            const { productId } = req.params;
+            const product = await productService.getProductById(productId);
+            if (!product) {
+                return res.status(404).json({ status: 'error', message: 'Product not found' });
+            }
+            res.status(200).json({ status: 'success', payload: product });
+        } catch (error) {
+            res.status(500).json({ status: 'error', message: 'Server Error', error: error.message });
+        }
     }
-}
 
-export const addProduct = async (req = request, res = response) => {
-    try {
-        const { title, description, price, code, stock, category} = req.body;
-        if(!title, !description, !price, !code, !stock, !category)
-            return res.status(404).json({ msg: 'Fields [title,description,price,code,stock,category] they are mandatory'})
-        const product = await addProductModerate({...req.body})
-        return res.json({ product })
-    } catch (error) {
-        return res.status(500).json({msg:'Talk to administrator'})
+    async addProduct(req, res) {
+        try {
+            console.log('Authenticated user:', req.session.user);
+            const product = req.body;
+            const user = req.session.user;
+
+            if (user.role === 'premium') {
+                product.owner = user.email;
+            } else {
+                product.owner = 'admin';
+            }
+
+            const newProduct = await productService.addProduct(product);
+            res.status(201).json({ status: 'success', payload: newProduct });
+        } catch (error) {
+            res.status(500).json({ status: 'error', message: 'Server error', error: error.message });
+        }
     }
-}
 
-export const deleteProduct = async (req = request, res = response) => {
-    try {
-        const {pid} = req.params
-        const product = await deleteProductModerate(pid)
-        if(product)
-            return res.json({msg:'Removed product', product})
-        return res.status(404),json({msg:`Could not delete product with id ${pid}`})
-    } catch (error) {
-        console.log('deleteProduct ->', error)
-        return res.status(500).json({msg:'Talk to administrator'})
+    async updateProduct(req, res) {
+        try {
+            const { productId } = req.params;
+            const product = req.body;
+            const updatedProduct = await productService.updateProduct(productId, product);
+            res.status(200).json({ status: 'success', payload: updatedProduct });
+        } catch (error) {
+            res.status(500).json({ status: 'error', message: 'Server Error', error: error.message });
+        }
     }
-}
 
-export const updateProduct = async (req = request, res = response) => {
-    try {
-        const { pid } = req.params
-        const {_id, ...rest} = req.body
-        const product = await updateProductModerate(pid, rest)
-        if(product)
-            return res.json({msg:'Updated product', product})
-        return res.status(404),json({msg:`Could not update product with id ${id}`})
-    } catch (error) {
-        return res.status(500).json({msg:'Talk to administrator'})
+    async deleteProduct(req, res) {
+        try {
+            const { productId } = req.params;
+            await productService.deleteProduct(productId);
+            res.status(204).json({ status: 'success' });
+        } catch (error) {
+            res.status(500).json({ status: 'error', message: 'Server Error', error: error.message });
+        }
     }
 }

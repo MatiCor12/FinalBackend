@@ -1,0 +1,82 @@
+<h1>Purchase Details</h1>
+<ul>
+    {{#each cart.items}}
+    <li>
+        Product: {{this.productId.title}} - quantity: {{this.quantity}} - Price: ${{this.productId.price}}
+    </li>
+    {{/each}}
+</ul>
+<h3>Total: ${{ticket.amount}}</h3>
+
+<button id="payButton">Pay</button>
+<button id="sendReceiptButton">Send Proof</button>
+
+<script>
+    document.getElementById('payButton').addEventListener('click', async () => {
+        try {
+            const response = await fetch(`/api/carts/{{cart._id}}/purchase/pay`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                Swal.fire({
+                    title: 'Successful Purchase',
+                    text: 'Purchase made successfully. Redirecting to home',
+                    icon: 'success',
+                    timer: 3000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = '/';
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Error when making purchase',
+                    icon: 'error',
+                });
+            }
+        } catch (error) {
+            console.error('Error when making purchase', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Error when making purchase',
+                icon: 'error',
+            });
+        }
+    });
+
+    document.getElementById('sendReceiptButton').addEventListener('click', async () => {
+        try {
+            const response = await fetch(`/api/carts/{{cart._id}}/purchase/receipt`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                Swal.fire({
+                    title: 'Proof Sent',
+                    text: 'The receipt has been sent by mail.',
+                    icon: 'success',
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Error sending receipt.',
+                    icon: 'error',
+                });
+            }
+        } catch (error) {
+            console.error('Error sending receipt', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Error sending receipt',
+                icon: 'error',
+            });
+        }
+    });
+</script>

@@ -1,0 +1,12 @@
+<div>
+    <h2>User Profile</h2>
+    <p>Name: {{user.first_name}}</p>
+    <p>Last Name: {{user.last_name}}</p>
+    <p>Age: {{user.age}}</p>
+    <p>Your Role is: {{user.role}}</p>
+    <form action="/api/sessions/logout" method="POST">
+        <button type="submit">Logout</button>
+        <a href="/">Shop</a>
+    </form>
+    <a href="/api/sessions/change-role">Make premium</a>
+</div>

@@ -1,39 +1,94 @@
-<div>
-    <h1>Real time products:</h1>
-<table>
-    <tbody id="productos-body">
-    </tbody>
-</table>
-    <h2>Agregar Producto</h2>
-<form id="producto-form">
+<form class="row g-3 mx-4" id="formProduct">
     <!-- Product name -->
-    <label for="titulo">Product name</label>
-    <input type="text" name="titulo" id="titulo" placeholder="Product" required>
+    <div>
+        <label for="title">Product name</label>
+        <div>
+            <input type="text" name="title" id="title" required>
+        </div>
+    </div>
 
     <!-- Description -->
-    <label for="descripcion">Description</label>
-    <input type="text" name="descripcion" id="descripcion" placeholder="Caracteristicas del producto" required>
+    <div>
+        <label for="description">Description</label>
+        <div>
+            <input type="text" name="description" id="description" required>
+        </div>
+    </div>
 
     <!-- Price -->
-    <label for="precio">Price</label>
-    <input type="number" name="precio" id="precio" placeholder="1200" required>
+    <div>
+        <label for="price">Price</label>
+        <div>
+            <input type="number" name="price" id="price" required>
+        </div>
+    </div>
 
     <!-- Code -->
-    <label for="codigo">Code</label>
-    <input type="text" name="codigo" id="codigo" placeholder="A001" required>
+    <div>
+        <label for="code">Code</label>
+        <div>
+            <input type="text" name="code" id="code" required>
+        </div>
+    </div>
 
     <!-- Stock -->
-    <label for="stock">Stock</label>
-    <input type="number" name="stock" id="stock" placeholder="3" required>
+    <div>
+        <label for="stock">Stock</label>
+        <div>
+            <input type="number" name="stock" id="stock" required>
+        </div>
+    </div>
 
-    <!-- Category -->
-    <label for="categoria">Category</label>
-    <input type="text" name="categoria" id="categoria" placeholder="Gamer" required>
+    <!-- Category-->
+    <div>
+        <label for="category">Category</label>
+        <div>
+            <input type="text" name="category" id="category" required>
+        </div>
+    </div>
 
-    <!-- Button to added -->
-    <button type="submit">Added product</button>
+    <!-- Image -->
+    <div>
+        <label for="thumbnail" >Image (URL)</label>
+        <div>
+            <input  type="text" name="thumbnail" id="thumbnail" required>
+        </div>
+    </div>
+
+    <!-- Status (Checkbox) -->
+    <div>
+        <div>
+            <input name="status" class="form-check-input" type="checkbox" value="true" id="flexCheckChecked" checked>
+            <label class="form-check-label" for="flexCheckChecked">Status</label>
+        </div>
+    </div>
+
+    <!-- Button register -->
+    <div class="col-12 mt-4">
+        <button class="btn btn-primary" type="submit" id="add-btn">Register </button>
+    </div>
+
+    <h2>Delete Product:</h2>
+
+    <!-- ID of the Product to Delete -->
+    <div>
+        <label for="id-prod">Product ID</label>
+        <div>
+            <input type="number" name="id-prod" id="id-prod">
+        </div>
+    </div>
+
+    <!-- Button eliminated -->
+    <div>
+        <button type="button" class="btn btn-danger delete-btn" onclick="deleteProduct('{{_id}}')">Eliminate</button>
+    </div>
 </form>
-</div>
 
+<div class="row mt-4" id="list-products">
+
+</div>
+<script>
+    const user = {{{json user}}};
+</script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/realtime.js"></script>

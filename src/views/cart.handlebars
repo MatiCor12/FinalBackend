@@ -1,12 +1,61 @@
-<div>
-    <h1>Products in a cart</h1>
-
-    {{#each carrito.products}}
-    <div>
-        <h3>Product name: {{this.id.title}}</h3>
-        <p>Description: {{this.id.description}}</p>
-        <p>Price: ${{this.id.price}}</p>
-        <p>Quantity: {{this.quantity}}</p>
+<body>
+    <div id="cart" data-cart-id="{{cart._id}}" class="container mt-5">
+        {{#if cart.items.length}}
+            <div class="row mt-4">
+                <div class="col">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Product</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each cart.items}}
+                            <tr>
+                                <td>
+                                    <a href="/products/{{this.productId._id}}">
+                                        <img class="cartImage" src="{{this.productId.thumbnail}}" alt="{{this.productId.description}}">
+                                    </a>
+                                </td>
+                                <td>{{this.productId.title}}</td>
+                                <td>{{this.productId.description}}</td>
+                                <td>${{this.productId.price}}</td>
+                                <td>
+                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                        <span class="mx-2">{{this.quantity}}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger" onclick="removeFromCart('{{../cart._id}}', '{{this.productId._id}}')">Eliminar</button>
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <a class="btn btn-info" href="/">Continue shopping</a>
+                </div>
+                <div>
+                    <button class="btn btn-danger" onclick="emptyCart('{{cart._id}}')">Empty cart</button>
+                </div>
+                <div>
+                    <a class="btn btn-success" href="/api/carts/{{cart._id}}/purchase">Finish purchase</a>
+                </div>
+            </div>
+        {{else}}
+            <div>
+                <h2 class="text-center mt-4">You have no products in your cart</h2>
+                <a class="btn btn-info" href="/">Continue shopping</a>
+            </div>
+        {{/if}}
     </div>
-    {{/each}}
-</div>
+    <script src="/js/cart.js"></script>
+</body>
