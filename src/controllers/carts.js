@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import CartService from '../repositories/cartsRepository.js';
+import CartService from '../service/cartsService.js';
 import Ticket from '../dao/models/ticket.model.js'
 
 const cartService = new CartService();
@@ -36,13 +36,13 @@ export default class CartController {
             if (!cart) {
                 return res.status(404).send('Cart not found');
             }
-    
+
             const amount = cart.items.reduce((total, item) => total + (item.productId.price * item.quantity), 0);
             const ticket = {
                 amount,
                 purchaser: req.user.email
             };
-    
+
             res.render('purchase', { cart, ticket });
         } catch (error) {
             console.error('Error getting purchase details', error);
@@ -92,7 +92,6 @@ export default class CartController {
                 purchaser: req.user.email
             });
             await ticket.save();
-            // Enviar email con el comprobante de compra
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
                 port: 587,

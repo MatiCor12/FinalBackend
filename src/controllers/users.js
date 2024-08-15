@@ -1,4 +1,4 @@
-import UserService from '../repositories/usersRepository.js';
+import UserService from '../service/usersService.js';
 import { createHash } from '../utils.js'
 import passport from 'passport';
 import nodemailer from 'nodemailer';
@@ -93,8 +93,6 @@ export const sendPasswordResetEmail = async (req, res) => {
             text: `Please click the following link to reset your password ${resetUrl}`,
         };
         transporter.sendMail(mailOptions);
-
-        // Respuesta con alerta y redirección
         res.send(`<script>alert('A password reset email has been sent'); window.location.href='/login';</script>`);
     } catch (error) {
         console.error('Error sending recovery email', error);
@@ -112,15 +110,12 @@ export const resetPassword = async (req, res) => {
         }
 
         await userService.updatePassword(user._id, password);
-
-        // Respuesta con alerta y redirección
         res.send(`<script>alert('Password reset successfully'); window.location.href='/login';</script>`);
     } catch (error) {
         console.error('Password reset error', error);
         res.status(500).send(`<script>alert('Server error'); window.location.href='/login';</script>`);
     }
 };
-
 
 export const renderChangeRole = async (req, res) => {
     try {
@@ -147,8 +142,7 @@ export const changeRole = async (req, res) => {
             console.log('User not found');
             return res.status(404).json({ error: 'User not founde' });
         }
-
-        // Cambiar el rol del usuario
+        
         if (role === 'premium') {
             user.role = 'premium';
         } else if (role === 'user') {
