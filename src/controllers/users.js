@@ -38,7 +38,7 @@ export const loginUser = async (req, res, next) => {
                 return next(err);
             }
             req.session.user = user;
-            return res.redirect('/api/sessions/current');
+            return res.redirect('/');
         });
     })(req, res, next);
 };
@@ -142,7 +142,7 @@ export const changeRole = async (req, res) => {
             console.log('User not found');
             return res.status(404).json({ error: 'User not founde' });
         }
-        
+
         if (role === 'premium') {
             user.role = 'premium';
         } else if (role === 'user') {
