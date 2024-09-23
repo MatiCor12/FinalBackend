@@ -62,7 +62,7 @@ export const initializePassport = () => {
     passport.use("github", new GitHubStrategy({
         clientID: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
-        callbackURL:isProduction
+        callbackURL:process.env.NODE_ENV === 'production'
         ? process.env.CALLBACK_URL
         : process.env.CALLBACK_URL_RAILWAY
     }, async (accessToken, refreshToken, profile, done) => {
