@@ -1,17 +1,21 @@
 import express from 'express';
-import productRoutes from './routes/productRoutes.js';
-import cartRoutes from './routes/cartRoutes.js';
-import viewsRoutes from './routes/viewsRoutes.js';
-import userRoutes from './routes/userRoutes.js';
-import { Server } from 'socket.io';
-import handlebars from 'express-handlebars';
-import { __dirname } from './utils.js';
-import 'dotenv/config';
-import { dbConnection } from './config/config.js';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import passport from 'passport';
 import bodyParser from 'body-parser';
+import 'dotenv/config';
+import { Server } from 'socket.io';
+import { engine } from 'express-handlebars';
+import swaggerUiExpress from 'swagger-ui-express';
+import swaggerJsDoc from 'swagger-jsdoc';
+
+import productRoutes from './routes/productRoutes.js';
+import cartRoutes from './routes/cartRoutes.js';
+import viewsRoutes from './routes/viewsRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+
+import { __dirname } from './utils.js';
+import { dbConnection } from './config/config.js';
 import { initializePassport } from './config/passport.js';
 import { socketProducts } from './listener/socketProducts.js';
 import { socketChat }from './listener/socketChat.js';
@@ -31,6 +35,19 @@ app.use(session({
     saveUninitialized: false,
 }));
 
+const swaggerOptions = {
+    definition:{
+        openapi:'3.0.1',
+        info:{
+            title:"Documentacion",
+            description:"Api clase swagger",
+        },
+    },
+    apis:[`src/docs/**/*.yaml`],
+}
+const specs = swaggerJsDoc(swaggerOptions);
+app.use("/api/docs", swaggerUiExpress.serve, swaggerUiExpress.setup(specs))
+
 //Paspport
 app.use(passport.initialize());
 app.use(passport.session());
@@ -48,20 +65,25 @@ app.use((req, res, next) => {
 });
 
 //Uso de handlebars
-const hbs = handlebars.create({
+app.engine('handlebars', engine({
     helpers: {
         json: function(context) {
             return JSON.stringify(context);
+        },
+        eq: function(a, b) {
+            return a === b;
+        },
+        or: function(v1, v2, options) {
+            return v1 || v2;
         }
     },
     runtimeOptions: {
         allowProtoPropertiesByDefault: true,
         allowProtoMethodsByDefault: true,
     }
-});
+}));
 
 // Configuración de Express para renderizar vistas con handlebars
-app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 app.set('views', __dirname + '/views');
 

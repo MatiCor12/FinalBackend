@@ -4,9 +4,36 @@
     <p>Last Name: {{user.last_name}}</p>
     <p>Age: {{user.age}}</p>
     <p>Your Role is: {{user.role}}</p>
-    <form action="/api/sessions/logout" method="POST">
-        <button type="submit">Logout</button>
-        <a href="/">Shop</a>
-    </form>
-    <a href="/api/sessions/change-role">Make premium</a>
-</div>
+
+    <!-- Change role button -->
+<form id="go-to-change-role-form" action="/api/sessions/change-role" method="GET">
+    <button type="submit">Change role</button>
+</form>
+<script>
+    document.getElementById('change-role-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const role = formData.get('role');
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ role })
+            });
+            if (response.ok) {
+                let message = role === 'premium' ? 'Congratulations! You are now a Premium user' : 'You have changed to a normal user';
+                alert(message);
+                window.location.href = '/api/sessions/current';
+            } else {
+                const errorData = await response.json();
+                alert(errorData.error || 'Error changing role');
+            }
+        } catch (error) {
+            console.error('Fetch error', error);
+            alert('Error changing role. Try again');
+        }
+    });
+</script>

@@ -37,7 +37,7 @@ export default class ProductController {
                 hasNextPage: products.hasNextPage
             });
         } catch (error) {
-            res.status(500).json({ status: 'error', message: 'Server Error', error: error.message });
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 
@@ -50,7 +50,7 @@ export default class ProductController {
             }
             res.status(200).json({ status: 'success', payload: product });
         } catch (error) {
-            res.status(500).json({ status: 'error', message: 'Server Error', error: error.message });
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 
@@ -69,7 +69,7 @@ export default class ProductController {
             const newProduct = await productService.addProduct(product);
             res.status(201).json({ status: 'success', payload: newProduct });
         } catch (error) {
-            res.status(500).json({ status: 'error', message: 'Server error', error: error.message });
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 
@@ -80,7 +80,7 @@ export default class ProductController {
             const updatedProduct = await productService.updateProduct(productId, product);
             res.status(200).json({ status: 'success', payload: updatedProduct });
         } catch (error) {
-            res.status(500).json({ status: 'error', message: 'Server Error', error: error.message });
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 
@@ -90,7 +90,7 @@ export default class ProductController {
             await productService.deleteProduct(productId);
             res.status(204).json({ status: 'success' });
         } catch (error) {
-            res.status(500).json({ status: 'error', message: 'Server Error', error: error.message });
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 }

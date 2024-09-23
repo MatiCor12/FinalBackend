@@ -1,10 +1,10 @@
 import passport from 'passport';
-import { Strategy as LocalStrategy } from 'passport-local';
 import GitHubStrategy from 'passport-github2'
 import User from '../dao/models/user.model.js';
-import { createHash, isValidPassword } from '../utils.js'
 import userService from '../dao/models/user.model.js'
 import cartService from '../dao/models/carts.model.js'
+import { Strategy as LocalStrategy } from 'passport-local';
+import { createHash, isValidPassword } from '../utils.js'
 
 export const initializePassport = () => {
     passport.use('register', new LocalStrategy({

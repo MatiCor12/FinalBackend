@@ -17,7 +17,7 @@ export default class UserManager {
             await newUser.save();
             return newUser.toObject();
         } catch (error) {
-            console.error('Error creating user:', error);
+            console.error('Error creating user', error);
             throw error;
         }
     }
@@ -66,6 +66,15 @@ export default class UserManager {
         }
     }
 
+    async updateLastConnection(userId) {
+        try {
+            return await User.findByIdAndUpdate(userId, { last_connection: new Date() }, { new: true });
+        } catch (error) {
+            console.error('Error updating last connection', error);
+            throw error;
+        }
+    }
+
     async updatePassword(userId, hashedPassword) {
         try {
             return await User.findByIdAndUpdate(userId, {
@@ -93,6 +102,36 @@ export default class UserManager {
             return await User.findByIdAndUpdate(user._id, { role: user.role }, { new: true });
         } catch (error) {
             console.error('Error updating role', error);
+            throw error;
+        }
+    }
+    async getAllUsers() {
+        try {
+            return await User.find().lean();
+        } catch (error) {
+            console.error('Error getting all users', error);
+            throw error;
+        }
+    }
+
+    async deleteUser(userId) {
+        try {
+            return await User.findByIdAndDelete(userId);
+        } catch (error) {
+            console.error('Error deleting user', error);
+            throw error;
+        }
+    }
+
+    async addUserDocuments(userId, documents) {
+        try {
+            return await User.findByIdAndUpdate(
+                userId,
+                { $push: { documents: { $each: documents } } },
+                { new: true }
+            );
+        } catch (error) {
+            console.error('Error adding documents to user', error);
             throw error;
         }
     }

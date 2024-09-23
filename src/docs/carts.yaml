@@ -1,0 +1,186 @@
+openapi: 3.0.1
+info:
+  title: API de Carrito
+  description: API para la gestión de carritos de compra
+  version: 1.0.0
+
+paths:
+  /api/carts:
+    post:
+      summary: Crear carrito
+      tags:
+        - Carts
+      responses:
+        '200':
+          description: Carrito creado
+        '401':
+          description: No autorizado
+
+  /api/carts/{cid}:
+    get:
+      summary: Obtener carrito por ID
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+      responses:
+        '200':
+          description: Carrito obtenido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '404':
+          description: Carrito no encontrado
+        '401':
+          description: No autorizado
+
+    delete:
+      summary: Limpiar carrito
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito para limpiar
+      responses:
+        '200':
+          description: Carrito vacio
+        '404':
+          description: Carrito no encontrado
+        '401':
+          description: No autorizado
+  paths:
+  /api/carts/{cid}/products/{pid}:
+    post:
+      summary: Agregar un producto al carrito
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+        - in: path
+          name: pid
+          required: true
+          schema:
+            type: string
+          description: ID del producto
+      responses:
+        '200':
+          description: Producto añadido al carrito exitosamente
+        '401':
+          description: No autorizado
+
+    delete:
+      summary: Eliminar un producto del carrito
+      tags:
+        - Carrito
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+        - in: path
+          name: pid
+          required: true
+          schema:
+            type: string
+          description: ID del producto
+      responses:
+        '200':
+          description: Producto eliminado del carrito exitosamente
+        '401':
+          description: No autorizado
+
+  /api/carts/{cid}/purchase:
+    get:
+      summary: Obtener información de compra
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+      responses:
+        '200':
+          description: Información de compra obtenida
+        '401':
+          description: No autorizado
+
+  /api/carts/{cid}/purchase/pay:
+    post:
+      summary: Realizar la compra
+      tags:
+        - Carrito
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+      responses:
+        '200':
+          description: Compra realizada
+          content:
+          application/json:
+            schema:
+              type: object
+        '404':
+          description: Carrito no encontrado
+        '401':
+          description: No autorizado
+
+  /api/carts/{cid}/purchase/receipt:
+    post:
+      summary: Recibo de compra
+      tags:
+        - Carts
+      responses:
+        '200':
+          description: Recibo de compra
+        '400':
+          description: No se pudo enviar el recibo
+        '401':
+          description: No autorizado
+
+components:
+  schemas:
+    Cart:
+      type: object
+      properties:
+        _id:
+          type: string
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID del producto
+        name:
+          type: string
+          description: Nombre del producto
+        price:
+          type: number
+          description: Precio del producto

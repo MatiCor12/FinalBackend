@@ -26,24 +26,32 @@ export const registerUser = async (req, res) => {
 };
 
 export const loginUser = async (req, res, next) => {
-    passport.authenticate('login', (err, user, info) => {
+    passport.authenticate('login', async (err, user, info) => {
         if (err) {
             return next(err);
         }
         if (!user) {
             return res.redirect('/login?error=Incorrect username or password');
         }
-        req.logIn(user, (err) => {
+        req.logIn(user, async (err) => {
             if (err) {
                 return next(err);
             }
+            await userService.updateLastConnection(user._id);
             req.session.user = user;
-            return res.redirect('/');
+            return res.redirect('/api/sessions/current');
         });
     })(req, res, next);
 };
 
-export const logoutUser = (req, res) => {
+export const logoutUser = async (req, res) => {
+    if(req.user) {
+        try {
+            await userService.updateLastConnection(req.user._id);
+        } catch (error) {
+            console.error('Error updating last connection', error);
+        }
+    }
     req.logout((err) => {
         if (err) {
             return next(err);
@@ -76,7 +84,6 @@ export const sendPasswordResetEmail = async (req, res) => {
         }
 
         const token = await userService.generatePasswordResetToken(user._id);
-
         const transporter = nodemailer.createTransport({
             service: 'Gmail',
             auth: {
@@ -108,7 +115,6 @@ export const resetPassword = async (req, res) => {
         if (!user) {
             return res.status(400).send(`<script>alert('Invalid or expired token'); window.location.href='/login';</script>`);
         }
-
         await userService.updatePassword(user._id, password);
         res.send(`<script>alert('Password reset successfully'); window.location.href='/login';</script>`);
     } catch (error) {
@@ -123,7 +129,8 @@ export const renderChangeRole = async (req, res) => {
         if (!user) {
             return res.status(404).send('User not found');
         }
-        res.render('changeRole', { user });
+        const isPremium = user.role === 'premium';
+        res.render('changeRole', { user, isPremium });
     } catch (error) {
         console.error('Error rendering view', error);
         res.status(500).send('Error rendering view');
@@ -132,33 +139,98 @@ export const renderChangeRole = async (req, res) => {
 
 export const changeRole = async (req, res) => {
     try {
-        console.log('Entering changeRole');
         const { uid } = req.params;
         const { role } = req.body;
-        console.log('UID:', uid, 'Role:', role);
-
         const user = await userService.findUserById(uid);
         if (!user) {
-            console.log('User not found');
-            return res.status(404).json({ error: 'User not founde' });
+            return res.status(404).json({ error: 'User not found' });
         }
-
         if (role === 'premium') {
-            user.role = 'premium';
+            const hasEnoughDocuments = user.documents && user.documents.length >= 3;
+            if (!hasEnoughDocuments) {
+                return res.status(400).json({ error: 'User did not upload required documentation(.txt)' });
+            }
+            user.role = 'premium'
         } else if (role === 'user') {
             user.role = 'user';
         }
-
         await userService.updateUserRole(user);
-        console.log('Changed role');
-
         if (req.session.user._id.toString() === uid.toString()) {
             req.session.user.role = user.role;
         }
-
-        return res.status(200).json({ message: 'Changed role' });
+        return res.redirect('/api/sessions/current');
     } catch (error) {
         console.error('Error when changing Role', error);
         return res.status(500).json({ error: 'Error when changing Role' });
     }
 }
+
+export const uploadDocuments = async (req, res) => {
+    const { uid } = req.params;
+    try {
+        const user = await userService.findUserById(uid);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const documents = req.files.map(file => ({
+            name: file.fieldname,
+            reference: `/uploads/${file.fieldname === 'profile' ? 'profiles' : 'documents'}/${file.filename}`
+        }));
+
+        await userService.addUserDocuments(uid, documents);
+        return res.json({ message: 'Documents uploaded correctly' });
+    } catch (error) {
+        console.error('Error uploading documents', error);
+        return res.status(500).json({ error: 'Error uploading documents' });
+    }
+};
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await userService.getAllUsers();
+        res.render('adminUsers', { users });
+    } catch (error) {
+        console.error('Error getting all users', error);
+        res.status(500).send('Error getting all users');
+    }
+};
+
+export const deleteUser = async (req, res) => {
+    const { uid } = req.params;
+    try {
+        const user = await userService.findUserById(uid);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        const mailOptions = {
+            to: user.email,
+            from: process.env.EMAIL_USER,
+            subject: 'Deleted account',
+            text: 'Your account has been deleted',
+        };
+
+        transporter.sendMail(mailOptions, async (error, info) => {
+            if (error) {
+                console.error('Error sending account deletion email', error);
+                return res.status(500).json({ error: 'Error sending email' });
+            } else {
+                console.log('Email sent:', info.response);
+                await userService.deleteUser(uid);
+                return res.redirect('/api/sessions/admin/users');
+            }
+        });
+
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ error: 'Error deleting user' });
+    }
+};

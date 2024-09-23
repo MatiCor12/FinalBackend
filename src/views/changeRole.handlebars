@@ -1,45 +1,75 @@
-<form id="change-role-form" action="/api/sessions/change-role/{{user._id}}" method="POST">
-    <select name="role">
-        <option value="premium">Make premium</option>
-        <option value="user">Make user</option>
-    </select>
-    <button type="submit">Change role</button>
-</form>
+<h1>Change user role</h1>
+
+{{#if user}}
+    {{#if isPremium}}
+    <p>You are already a Premium user. Do you want to change to normal user?</p>
+    <form id="change-role-form" action="/api/sessions/change-role/{{user._id}}" method="POST">
+        <input type="hidden" name="role" value="user">
+        <button type="submit">Switch to normal user</button>
+    </form>
+    {{else}}
+    <p>Upload proof to change to a premium user:</p>
+    <form id="upload-documents-form" action="/api/sessions/{{user._id}}/documents" method="POST" enctype="multipart/form-data">
+        <input type="file" name="documents" multiple required>
+        <button type="submit">Upload documents</button>
+    </form>
+    <form id="change-role-form" action="/api/sessions/change-role/{{user._id}}" method="POST">
+        <input type="hidden" name="role" value="premium">
+        <button type="submit">Switch to premium</button>
+    </form>
+    {{/if}}
+{{else}}
+    <p>User not found</p>
+{{/if}}
 
 <script>
-    document.getElementById('change-role-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    console.log('Formulario enviado');
-
-    const form = event.target;
-    const formData = new FormData(form);
-    const role = formData.get('role');
-    console.log('Role seleccionado:', role);
-
-    fetch(form.action, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ role })
-    })
-    .then(response => {
-        if (response.ok) {
-            let message = '';
-            if (role === 'premium') {
-                message = 'Congratulations! You are now a Premium user';
+    document.getElementById('upload-documents-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData
+            });
+            if (response.ok) {
+                alert('Documents uploaded. Now you can switch to Premium.');
             } else {
-                message = 'You have changed to a standard user';
+                const errorData = await response.json();
+                alert(errorData.error || 'Error al subir documentos');
             }
-            alert(message);
-            window.location.href = '/api/sessions/current';
-        } else {
-            alert('Error changing role. try again');
+        } catch (error) {
+            console.error('Request error', error);
+            alert('Error uploading documents. try again');
         }
     })
-    .catch(error => {
-        console.error('Error en fetch:', error);
-        alert('Error changing role. try again');
-    });
-});
+
+    document.querySelectorAll('#change-role-form').forEach(form => {
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const role = formData.get('role');
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ role })
+                });
+
+                if (response.ok) {
+                    let message = role === 'premium' ? 'Congratulations! You are now a Premium user' : 'You have changed to a normal user';
+                    alert(message);
+                    window.location.href = '/api/sessions/current';
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.error || 'Error changing role');
+                }
+            } catch (error) {
+                console.error('Fetch error', error);
+                alert('Error changing role. Try again');
+            }
+        })
+    })
 </script>

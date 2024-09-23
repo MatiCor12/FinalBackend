@@ -10,8 +10,7 @@ export default class CartController {
             const newCart = await cartService.createCart();
             res.status(201).json(newCart);
         } catch (error) {
-            console.error('Error creating cart', error);
-            res.status(500).json({ error: 'Error creating cart'});
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 
@@ -24,8 +23,7 @@ export default class CartController {
             }
             res.render('cart', { cart });
         } catch (error) {
-            console.error('Error getting cart', error);
-            res.status(500).json({ error: 'Error getting cart' });
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 
@@ -45,8 +43,7 @@ export default class CartController {
 
             res.render('purchase', { cart, ticket });
         } catch (error) {
-            console.error('Error getting purchase details', error);
-            res.status(500).send('Error getting purchase details');
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 
@@ -58,8 +55,7 @@ export default class CartController {
             const updatedCart = await cartService.addItemToCart(cid, pid, quantity, user);
             res.status(200).json(updatedCart);
         } catch (error) {
-            console.error('Error when adding product to cart', error.message);
-            res.status(500).json({ error: 'Error when adding product to cart' });
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 
@@ -74,8 +70,7 @@ export default class CartController {
             await cart.save();
             res.status(200).send('Purchase made');
         } catch (error) {
-            console.error('Error when making purchase:', error);
-            res.status(500).send('Error when making purchase');
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 
@@ -112,8 +107,7 @@ export default class CartController {
 
             res.status(200).send('Proof of your purchase');
         } catch (error) {
-            console.error('Error sending receipt', error);
-            res.status(500).send('Error sending receipt');
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 
@@ -123,8 +117,7 @@ export default class CartController {
             const updatedCart = await cartService.removeItemFromCart(cid, pid);
             res.status(200).json(updatedCart);
         } catch (error) {
-            console.error('Error when removing product from cart:', error);
-            res.status(500).json({ error: 'Error when removing product from cart' });
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 
@@ -134,8 +127,7 @@ export default class CartController {
             const clearedCart = await cartService.clearCart(cid);
             res.status(200).json(clearedCart);
         } catch (error) {
-            console.error('Error emptying cart', error);
-            res.status(500).json({ error: 'Error emptying cart' });
+            return res.status(500).json({msg:'Talk to administrator'})
         }
     }
 }

@@ -4,7 +4,6 @@ socketClient.on("enviodeproducts",(obj)=>{
     updateProductList(obj)
 })
 
-
 function updateProductList(productList) {
 
     const productsDiv  = document.getElementById('list-products')
@@ -25,12 +24,12 @@ function updateProductList(productList) {
                 <li>category: ${product.category}</li>
                 <li>status: ${product.status}</li>
                 <li>stock: ${product.stock}</li>
+                <li>Owner: ${product.owner}</li>
                 thumbnail: <img src="${product.thumbnail}" alt="img" class="img-thumbnail img-fluid">        </ul>
                 </p>
             </div>
             <div class="d-flex justify-content-center mb-4">
             <button type="button" class="btn btn-danger delete-btn" onclick="deleteProduct('${product._id}')">Eliminar</button>
-
             </div>
           </div>
         </div>`

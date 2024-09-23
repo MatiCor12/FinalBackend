@@ -24,9 +24,17 @@ export default class UserService {
     async generatePasswordResetToken(userId) {
         const token = crypto.randomBytes(20).toString('hex');
         const expires = Date.now() + 3600000;
-
         await userManager.savePasswordResetToken(userId, token, expires);
         return token;
+    }
+
+    async updateLastConnection(userId) {
+        try {
+            return await userManager.updateLastConnection(userId);
+        } catch (error) {
+            console.error('Error updating last connection', error);
+            throw error;
+        }
     }
 
     async findUserByResetToken(token) {
@@ -44,5 +52,17 @@ export default class UserService {
 
     async updateUserRole(user) {
         return await userManager.updateUserRole(user);
+    }
+
+    async addUserDocuments(userId, documents) {
+        return await userManager.addUserDocuments(userId, documents);
+    }
+
+    async getAllUsers() {
+        return await userManager.getAllUsers();
+    }
+
+    async deleteUser(userId) {
+        return await userManager.deleteUser(userId);
     }
 }

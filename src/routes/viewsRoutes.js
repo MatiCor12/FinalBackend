@@ -12,5 +12,9 @@ router.get('/realtimeproducts', isAuthenticated, isAdminOrPremium, viewsControll
 router.get('/chat', isAuthenticated, isUserOrPremium, viewsController.getChat.bind(viewsController));
 router.get('/login', isNotAuthenticated, viewsController.getLogin.bind(viewsController));
 router.get('/register', isNotAuthenticated, viewsController.getRegister.bind(viewsController));
+router.get('/upload-documents', isAuthenticated, (req, res) => {
+    res.render('uploadDocuments', { user: req.user });
+});
+
 
 export default router;
