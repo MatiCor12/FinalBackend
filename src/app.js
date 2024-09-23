@@ -3,6 +3,7 @@ import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import passport from 'passport';
 import bodyParser from 'body-parser';
+import path from 'path';
 import 'dotenv/config';
 import { Server } from 'socket.io';
 import { engine } from 'express-handlebars';
@@ -85,7 +86,7 @@ app.engine('handlebars', engine({
 
 // Configuración de Express para renderizar vistas con handlebars
 app.set('view engine', 'handlebars');
-app.set('views', __dirname + '/views');
+app.set('views', path.join(__dirname, '/views'));
 
 //Importar las rutas que serán usadas
 app.use('/', viewsRoutes);
