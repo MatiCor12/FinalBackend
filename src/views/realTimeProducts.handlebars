@@ -1,63 +1,63 @@
 <form class="row g-3 mx-4" id="formProduct">
     <!-- Product name -->
-    <div>
-        <label for="title">Product name</label>
-        <div>
-            <input type="text" name="title" id="title" required>
+    <div class="col-md-6">
+        <label for="title" class="form-label">Product name</label>
+        <div class="input-group">
+            <input class="form-control" type="text" name="title" id="title" required>
         </div>
     </div>
 
     <!-- Description -->
-    <div>
-        <label for="description">Description</label>
-        <div>
-            <input type="text" name="description" id="description" required>
+    <div class="col-md-6">
+        <label for="description" class="form-label">Description</label>
+        <div class="input-group">
+            <input class="form-control" type="text" name="description" id="description" required>
         </div>
     </div>
 
     <!-- Price -->
-    <div>
-        <label for="price">Price</label>
-        <div>
-            <input type="number" name="price" id="price" required>
+    <div class="col-md-6">
+        <label for="price" class="form-label">Price</label>
+        <div class="input-group">
+            <input class="form-control" type="number" name="price" id="price" required>
         </div>
     </div>
 
     <!-- Code -->
-    <div>
-        <label for="code">Code</label>
-        <div>
-            <input type="text" name="code" id="code" required>
+    <div class="col-md-6">
+        <label for="code" class="form-label">Code</label>
+        <div class="input-group">
+            <input class="form-control" type="text" name="code" id="code" required>
         </div>
     </div>
 
     <!-- Stock -->
-    <div>
-        <label for="stock">Stock</label>
-        <div>
-            <input type="number" name="stock" id="stock" required>
+    <div class="col-md-6">
+        <label for="stock" class="form-label">Stock</label>
+        <div class="input-group">
+            <input class="form-control" type="number" name="stock" id="stock" required>
         </div>
     </div>
 
     <!-- Category-->
-    <div>
-        <label for="category">Category</label>
-        <div>
-            <input type="text" name="category" id="category" required>
+    <div class="col-md-6">
+        <label for="category" class="form-label">Category</label>
+        <div class="input-group">
+            <input class="form-control" type="text" name="category" id="category" required>
         </div>
     </div>
 
     <!-- Image -->
-    <div>
-        <label for="thumbnail" >Image (URL)</label>
-        <div>
-            <input  type="text" name="thumbnail" id="thumbnail" required>
+    <div class="col-md-6">
+        <label for="thumbnail" class="form-label">Image (URL)</label>
+        <div class="input-group">
+            <input class="form-control" type="text" name="thumbnail" id="thumbnail" required>
         </div>
     </div>
 
     <!-- Status (Checkbox) -->
-    <div>
-        <div>
+    <div class="col-md-6">
+        <div class="form-check mt-4">
             <input name="status" class="form-check-input" type="checkbox" value="true" id="flexCheckChecked" checked>
             <label class="form-check-label" for="flexCheckChecked">Status</label>
         </div>
@@ -85,8 +85,8 @@
 </form>
 
 <div class="row mt-4" id="list-products">
-
 </div>
+
 <script>
     const user = {{{json user}}};
 </script>
